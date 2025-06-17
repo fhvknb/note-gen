@@ -1,6 +1,6 @@
 'use client'
 import useArticleStore from '@/stores/article'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Vditor from 'vditor'
 import { exists, mkdir, writeFile } from '@tauri-apps/plugin-fs'
 import "vditor/dist/index.css"
@@ -29,6 +29,7 @@ export function MdEditor() {
   const t = useTranslations('article.editor')
   const { currentLocale } = useI18n()
   const [localMode, setLocalMode] = useLocalStorage<'ir' | 'sv' | 'wysiwyg'>('useLocalMode', 'ir')
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   function getLang() {
     switch (currentLocale) {
@@ -45,7 +46,7 @@ export function MdEditor() {
     const toolbarConfig = [
       { name: 'undo', tipPosition: 's' },
       { name: 'redo', tipPosition: 's' },
-      '|',{
+      '|', {
         name: 'mark',
         tipPosition: 's',
         tip: t('toolbar.mark.tooltip'),
@@ -106,7 +107,7 @@ export function MdEditor() {
       { name: 'preview', tipPosition: 's' },
       { name: 'outline', tipPosition: 's' },
     ]
-    
+
     const vditor = new Vditor('aritcle-md-editor', {
       lang: getLang(),
       height: document.documentElement.clientHeight - 100,
@@ -154,7 +155,7 @@ export function MdEditor() {
         if (activeFilePath === '') {
           vditor.setValue('', true)
         }
-        
+
       },
       input: (value) => {
         saveCurrentArticle(value)
@@ -198,6 +199,9 @@ export function MdEditor() {
         after: (length: number) => {
           emitter.emit('toolbar-text-number', length)
         }
+      },
+      esc: () => {
+        // handleEsc();
       }
     })
   }
@@ -205,7 +209,7 @@ export function MdEditor() {
   async function uploadImages(files: File[]) {
     const list = await Promise.all(
       files.map((file) => {
-        return new Promise<string>(async(resolve, reject) => {
+        return new Promise<string>(async (resolve, reject) => {
           if (!file.type.includes('image')) return
           const toastNotification = toast({
             title: t('upload.uploading'),
@@ -245,14 +249,14 @@ export function MdEditor() {
   const setContent = (content: string) => {
     if (!editor) return
     editor.setValue(content)
-    
+
     // 如果有匹配位置，滚动到对应位置
     if (matchPosition !== null) {
       setTimeout(() => {
         try {
           // 获取编辑器预览区域
           let editorElement: HTMLElement | null = null
-          
+
           // 安全地访问 vditor 属性
           const vditor = editor as any
           if (vditor.vditor) {
@@ -264,24 +268,24 @@ export function MdEditor() {
               editorElement = vditor.vditor.sv.element
             }
           }
-          
+
           if (editorElement) {
             // 计算目标位置前的文本
             const textBefore = content.substring(0, matchPosition)
             // 计算行数（通过换行符数量）
             const lineCount = (textBefore.match(/\n/g) || []).length
-            
+
             // 创建一个范围来定位匹配位置
             const range = document.createRange()
             const textNodes = Array.from(editorElement.querySelectorAll('*'))
-              .filter(node => node.childNodes.length > 0 && 
-                     node.childNodes[0].nodeType === Node.TEXT_NODE)
-            
+              .filter(node => node.childNodes.length > 0 &&
+                node.childNodes[0].nodeType === Node.TEXT_NODE)
+
             // 尝试找到匹配位置附近的文本节点
             let currentPos = 0
             let targetNode = null
             let targetOffset = 0
-            
+
             for (const node of textNodes) {
               const textContent = node.textContent || ''
               if (currentPos + textContent.length >= matchPosition) {
@@ -291,18 +295,18 @@ export function MdEditor() {
               }
               currentPos += textContent.length
             }
-            
+
             // 如果找到了目标节点，设置选择范围并滚动
             if (targetNode) {
               try {
                 range.setStart(targetNode, Math.min(targetOffset, targetNode.textContent?.length || 0))
                 range.setEnd(targetNode, Math.min(targetOffset + 1, targetNode.textContent?.length || 0))
-                
+
                 const selection = window.getSelection()
                 if (selection) {
                   selection.removeAllRanges()
                   selection.addRange(range)
-                  
+
                   // 滚动到选中位置
                   const targetElement = range.startContainer.parentElement
                   if (targetElement) {
@@ -323,7 +327,7 @@ export function MdEditor() {
         } catch (e) {
           console.error('Error scrolling to match position:', e)
         }
-        
+
         // 处理完后重置匹配位置
         setMatchPosition(null)
       }, 300) // 给编辑器一点时间来渲染内容
@@ -355,7 +359,7 @@ export function MdEditor() {
         title: t('copySuccess'),
         description: `Markdown ${t('copySuccessDescription')}`,
       })
-    })  
+    })
     emitter.on('toolbar-copy-json', () => {
       const markdown = editor?.getValue()
       const json = editor?.exportJSON(markdown || '')
@@ -365,10 +369,22 @@ export function MdEditor() {
         description: `JSON ${t('copySuccessDescription')}`,
       })
     })
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        editor?.blur();
+      }
+
+    }
+    document.addEventListener('keydown', handler);
+    
     return () => {
       emitter.off('toolbar-copy-html')
       emitter.off('toolbar-copy-markdown')
-      emitter.off('toolbar-copy-json')
+      emitter.off('toolbar-copy-json');
+
+
+      document.removeEventListener('keydown', handler)
     }
   }, [editor])
 
@@ -430,13 +446,27 @@ export function MdEditor() {
 
   useEffect(() => {
     setContent(currentArticle)
+    // 自动滚动到顶部
+    if (contentRef?.current) {
+      const scrollTarget = document.getElementsByClassName('vditor-ir')?.[0]?.children?.[0];
+      // console.log(scrollTarget);
+      if (scrollTarget) {
+        scrollTarget.scrollTo({ top: 0, left: 0 })
+      }
+    }
+
   }, [currentArticle])
+
+
+
+
+
 
   return <div className='flex-1 h-screen flex flex-col overflow-hidden dark:bg-zinc-950'>
     {
       editor && <CustomToolbar editor={editor} />
     }
-    <div id="aritcle-md-editor" className='flex-1'></div>
+    <div id="aritcle-md-editor" className='flex-1' ref={contentRef}></div>
     {
       editor && <CustomFooter editor={editor} />
     }
