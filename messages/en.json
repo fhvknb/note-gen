@@ -63,7 +63,7 @@
       "noModel": "Do not use",
       "placeholder": "Please select or search for models",
       "main": "Main model",
-      "options" : {
+      "options": {
         "markDesc": {
           "title": "Record Description",
           "desc": "Used to process records after OCR recognition, generating record descriptions."
@@ -235,7 +235,7 @@
         "reset": "Reset to Default Path"
       },
       "info": {
-        "title": "Workspace Information", 
+        "title": "Workspace Information",
         "desc": "After changing the workspace, you need to restart the application for the changes to take full effect. Files in the new workspace will be displayed after restart."
       },
       "toast": {
@@ -277,7 +277,8 @@
         "screenshot": "Screenshot",
         "text": "Text",
         "file": "File",
-        "link": "Link"
+        "link": "Link",
+        "clear": "Clear"
       },
       "desc": "Description",
       "content": "Content",
@@ -295,13 +296,16 @@
         "newToken": "Create access token",
         "newTokenDesc": "New token must be configured with repo permission, configuration will automatically create file repository (private) and image repository."
       },
+      "clear": {
+        "title": "Are you sure you want to clear all records?",
+        "confirm": "Confirm"
+      },
       "text": {
         "title": "Record Text",
         "description": "Record a piece of text, which will be inserted into the appropriate position when organizing notes.",
         "characterCount": "{count} characters",
         "save": "Save"
       },
-
       "link": {
         "title": "Record Link",
         "description": "Enter a webpage link, and the system will automatically crawl the page content and save it",

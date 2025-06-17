@@ -62,17 +62,31 @@ export function ControlScan() {
   }
 
   async function createScreenShot() {
-    const fileNames = await invoke<ScreenshotImage[]>('screenshot')
-    const convertedFiles = fileNames.map((fileName: ScreenshotImage) => {
-      return {
-        ...fileName,
-        path: convertFileSrc(fileName.path),
+    try {
+      console.log("开始调用截图功能...");
+      const fileNames = await invoke<ScreenshotImage[]>('screenshot');
+      console.log("截图功能返回结果:", fileNames);
+
+      if (!fileNames || !fileNames.length) {
+        console.log("没有获取到任何窗口截图");
+        return;
       }
-    })
-    setFiles(convertedFiles)
-    const image = new window.Image();
-    image.src = convertedFiles[0].path;
-    setImage(image)
+      const convertedFiles = fileNames.map((fileName: ScreenshotImage) => {
+        return {
+          ...fileName,
+          path: convertFileSrc(fileName.path),
+        }
+      })
+      setFiles(convertedFiles)
+      const image = new window.Image();
+      image.src = convertedFiles[0].path;
+      setImage(image)
+      setOpen(true); // 确保对话框打开
+    } catch (error) {
+      console.error("截图功能调用失败:", error);
+      // 可以添加用户提示
+      alert(`截图功能调用失败: ${error}`);
+    }
   }
 
   function selectImage(file: ScreenshotImage) {

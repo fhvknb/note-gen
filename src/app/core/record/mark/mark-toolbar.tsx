@@ -1,6 +1,6 @@
 "use client"
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { RotateCcw } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import { useTranslations } from 'next-intl'
 import * as React from "react"
 import { initMarksDb } from "@/db/marks"
@@ -9,6 +9,7 @@ import { ControlText } from "./control-text"
 import { ControlImage } from "./control-image"
 import { ControlFile } from "./control-file"
 import { ControlLink } from "./control-link"
+import { ControlClear } from './control-clear'
 import { Toggle } from "@/components/ui/toggle"
 import useMarkStore from "@/stores/mark"
 
@@ -37,6 +38,7 @@ export function MarkToolbar() {
           <ControlFile />
           <ControlText />
           <ControlLink />
+          <ControlClear />
         </TooltipProvider>
       </div>
       <div className="flex items-center gap-1">
@@ -50,9 +52,10 @@ export function MarkToolbar() {
                 pressed={trashState}
                 onPressedChange={setTrashState}
                 size={"sm"}
+              
               >
                 <div>
-                  <RotateCcw className="size-4" />
+                  <Trash2  className="size-4"/>
                 </div>
               </Toggle>
             </TooltipTrigger>

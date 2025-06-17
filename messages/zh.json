@@ -269,7 +269,8 @@
         "screenshot": "截图",
         "text": "文本",
         "file": "文件",
-        "link": "链接"
+        "link": "链接",
+        "clear": "清空"
       },
       "desc": "描述",
       "content": "内容",
@@ -285,6 +286,10 @@
         "textAnalysis": "文本分析",
         "save": "保存",
         "saveImage": "保存图片"
+      },
+      "clear": {
+        "title": "确认要清空所有记录吗？",
+        "confirm": "确认"
       },
       "text": {
         "title": "记录文本",

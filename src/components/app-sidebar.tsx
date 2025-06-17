@@ -1,5 +1,6 @@
 'use client'
-import { ImageUp, Search, Settings, Highlighter, SquarePen } from "lucide-react"
+import { RefreshCcw, Search, Settings, Highlighter, SquarePen } from "lucide-react"
+
 import {
   Sidebar,
   SidebarContent,
@@ -46,7 +47,7 @@ export function AppSidebar() {
     {
       title: t('navigation.gallery'),
       url: "/core/image",
-      icon: ImageUp,
+      icon: RefreshCcw,
     },
   ]
   async function menuHandler(item: typeof items[0]) {
